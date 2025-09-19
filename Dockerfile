@@ -54,7 +54,7 @@ fi
 EOF
 
 # Create entrypoint script that can run HTTP server or keep container alive
-RUN printf '#!/bin/sh\necho "Starting HTTP MCP Server on port ${PORT:-3000}..."\n  exec node dist/index.js --http' > /app/entrypoint.sh && \
+RUN printf '#!/bin/sh\nif [ "$1" = "http" ]; then\n  echo "Starting HTTP MCP Server on port ${PORT:-3000}..."\n  exec node dist/index.js --http\nelse\n  echo "AWS S3 MCP Server container started. Use docker exec to run commands."\n  echo "For MCP Inspector, use: ./run-inspector.sh --docker"\n  echo "For HTTP server, use: docker run with http argument"\n  exec tail -f /dev/null\nfi\n' > /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh && \
     chmod +x /app/healthcheck.sh && \
     chown -R nodeuser:nodegroup /app
